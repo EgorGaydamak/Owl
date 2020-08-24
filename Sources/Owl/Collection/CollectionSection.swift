@@ -25,16 +25,29 @@ open class CollectionSection: Equatable, Copying, DifferentiableSection {
     }
     
 	// MARK: - Public Properties -
-
-	/// Identifier of the section
-	public let identifier: String
-
-	/// Items inside the collection
-	public private(set) var elements: [ElementRepresentable]
-
-	/// View of the header. It overrides any set value for `headerTitle`.
+    
+    /// Identifier of the section
+    public let identifier: String
+    
+    /// If `true` the content of the section is collapsed and no rows are visible.
+    public var isCollapsed = false
+    
+    /// The content of the section, including collapsed/invisible rows.
+    private var allElements: [ElementRepresentable]
+    
+    /// Identify the content of the table, single rows.
+    public var elements: [ElementRepresentable] {
+        get {
+            return (isCollapsed ? [] : allElements)
+        }
+        set {
+            allElements = newValue
+        }
+    }
+    
+    /// View of the header. It overrides any set value for `headerTitle`.
 	public var headerView: CollectionHeaderFooterAdapterProtocol?
-	
+
 	public var headerSize: CGSize?
 
 	/// View of the footer. It overrides any set value for `footerView`.
@@ -87,15 +100,16 @@ open class CollectionSection: Equatable, Copying, DifferentiableSection {
 	// MARK: - Initialization -
 
 	public required init(original: CollectionSection) {
-		self.elements = original.elements
+		self.allElements = original.allElements
 		self.identifier = original.identifier
 
 		self.headerView = original.headerView
 		self.footerView = original.footerView
+        self.isCollapsed = original.isCollapsed
 	}
 
 	public required init<C>(source: CollectionSection, elements: C) where C : Collection, C.Element == ElementRepresentable {
-		self.elements = Array(elements)
+		self.allElements = Array(elements)
 		self.identifier = source.identifier
 		
 		self.headerView = source.headerView
@@ -103,7 +117,7 @@ open class CollectionSection: Equatable, Copying, DifferentiableSection {
 	}
 
 	public init(id: String? = nil, elements: [ElementRepresentable] = []) {
-		self.elements = elements
+		self.allElements = elements
 		self.identifier = id ?? UUID().uuidString
 	}
 
@@ -118,7 +132,7 @@ open class CollectionSection: Equatable, Copying, DifferentiableSection {
 	// MARK: - Content Managegment -
 	
 	public func set(elements newElements: [ElementRepresentable]) {
-		elements = newElements
+		allElements = newElements
 	}
 	
 	/// Replace a model instance at specified index.
@@ -129,9 +143,9 @@ open class CollectionSection: Equatable, Copying, DifferentiableSection {
 	/// - Returns: old instance, `nil` if provided `index` is invalid.
 	@discardableResult
 	public func set(element: ElementRepresentable, at index: Int) -> ElementRepresentable? {
-		guard index >= 0, index < elements.count else { return nil }
-		let oldElement = elements[index]
-		elements[index] = element
+		guard index >= 0, index < allElements.count else { return nil }
+		let oldElement = allElements[index]
+		allElements[index] = element
 		return oldElement
 	}
 	
@@ -142,11 +156,11 @@ open class CollectionSection: Equatable, Copying, DifferentiableSection {
 	///   - index: destination index; if invalid or `nil` model is append at the end of the list.
 	public func add(element: ElementRepresentable?, at index: Int?) {
 		guard let element = element else { return }
-		guard let index = index, index < elements.count else {
-			elements.append(element)
+		guard let index = index, index < allElements.count else {
+			allElements.append(element)
 			return
 		}
-		elements.insert(element, at: index)
+		allElements.insert(element, at: index)
 	}
 	
 	/// Add models starting at given index of the array.
@@ -156,11 +170,11 @@ open class CollectionSection: Equatable, Copying, DifferentiableSection {
 	///   - index: destination starting index; if invalid or `nil` models are append at the end of the list.
 	public func add(elements newElements: [ElementRepresentable]?, at index: Int?) {
 		guard let newElements = newElements else { return }
-		guard let index = index, index < elements.count else {
-			elements.append(contentsOf: newElements)
+		guard let index = index, index < allElements.count else {
+			allElements.append(contentsOf: newElements)
 			return
 		}
-		elements.insert(contentsOf: newElements, at: index)
+		allElements.insert(contentsOf: newElements, at: index)
 	}
 	
 	/// Remove model at given index.
@@ -170,7 +184,7 @@ open class CollectionSection: Equatable, Copying, DifferentiableSection {
 	@discardableResult
 	public func remove(at rowIndex: Int) -> ElementRepresentable? {
 		guard rowIndex < elements.count else { return nil }
-		return elements.remove(at: rowIndex)
+		return allElements.remove(at: rowIndex)
 	}
 	
 	/// Remove model at given indexes set.
@@ -181,8 +195,8 @@ open class CollectionSection: Equatable, Copying, DifferentiableSection {
 	public func remove(atIndexes indexes: IndexSet) -> [ElementRepresentable] {
 		var removed: [ElementRepresentable] = []
 		indexes.reversed().forEach {
-			if $0 < elements.count {
-                removed.append(elements.remove(at: $0))
+			if $0 < allElements.count {
+                removed.append(allElements.remove(at: $0))
 			}
 		}
 		return removed
@@ -194,8 +208,8 @@ open class CollectionSection: Equatable, Copying, DifferentiableSection {
 	/// - Returns: count removed items.
 	@discardableResult
 	public func removeAll(keepingCapacity kp: Bool = false) -> Int {
-		let count = elements.count
-		elements.removeAll(keepingCapacity: kp)
+		let count = allElements.count
+		allElements.removeAll(keepingCapacity: kp)
 		return count
 	}
 	
@@ -205,8 +219,8 @@ open class CollectionSection: Equatable, Copying, DifferentiableSection {
 	///   - sourceIndex: source index
 	///   - destIndex: destination index
 	public func move(swappingAt sourceIndex: Int, with destIndex: Int) {
-		guard sourceIndex < elements.count, destIndex < elements.count else { return }
-		swap(&elements[sourceIndex], &elements[destIndex])
+		guard sourceIndex < allElements.count, destIndex < allElements.count else { return }
+		swap(&allElements[sourceIndex], &allElements[destIndex])
 	}
 	
 	/// Remove model at given index and insert at destination index.
@@ -215,9 +229,9 @@ open class CollectionSection: Equatable, Copying, DifferentiableSection {
 	///   - sourceIndex: source index
 	///   - destIndex: destination index
 	public func move(from sourceIndex: Int, to destIndex: Int) {
-		guard sourceIndex < elements.count, destIndex < elements.count else { return }
-		let removed = elements.remove(at: sourceIndex)
-		elements.insert(removed, at: destIndex)
+		guard sourceIndex < allElements.count, destIndex < allElements.count else { return }
+		let removed = allElements.remove(at: sourceIndex)
+		allElements.insert(removed, at: destIndex)
 	}
 	
 	// MARK: - Private Functions -
