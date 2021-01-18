@@ -25,7 +25,7 @@ public struct Changeset<Collection: Swift.Collection> {
 	public var elementUpdated: [ElementPath]
 	public var elementMoved: [(source: ElementPath, target: ElementPath)]
 
-	@inlinable
+	
 	public init(
 		data: Collection,
 		sectionDeleted: [Int] = [],
@@ -48,7 +48,7 @@ public struct Changeset<Collection: Swift.Collection> {
 		self.elementMoved = elementMoved
 	}
 	
-	@inlinable
+	
 	public var sectionChangeCount: Int {
 		return sectionDeleted.count
 			+ sectionInserted.count
@@ -56,7 +56,7 @@ public struct Changeset<Collection: Swift.Collection> {
 			+ sectionMoved.count
 	}
 	
-	@inlinable
+	
 	public var elementChangeCount: Int {
 		return elementDeleted.count
 			+ elementInserted.count
@@ -64,22 +64,22 @@ public struct Changeset<Collection: Swift.Collection> {
 			+ elementMoved.count
 	}
 	
-	@inlinable
+	
 	public var changeCount: Int {
 		return sectionChangeCount + elementChangeCount
 	}
 	
-	@inlinable
+	
 	public var hasSectionChanges: Bool {
 		return sectionChangeCount > 0
 	}
 	
-	@inlinable
+	
 	public var hasElementChanges: Bool {
 		return elementChangeCount > 0
 	}
 
-	@inlinable
+	
 	public var hasChanges: Bool {
 		return changeCount > 0
 	}

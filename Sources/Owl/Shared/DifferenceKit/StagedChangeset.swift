@@ -13,10 +13,10 @@
 import Foundation
 
 public struct StagedChangeset<Collection: Swift.Collection> {
-	@usableFromInline
+	
 	internal var changesets: ContiguousArray<Changeset<Collection>>
 	
-	@inlinable
+	
 	public init<C: Swift.Collection>(_ changesets: C) where C.Element == Changeset<Collection> {
 		self.changesets = ContiguousArray(changesets)
 	}
@@ -26,33 +26,33 @@ public struct StagedChangeset<Collection: Swift.Collection> {
 extension StagedChangeset: RandomAccessCollection, RangeReplaceableCollection, MutableCollection {
 	public typealias Element = Changeset<Collection>
 
-	@inlinable
+	
 	public init() {
 		self.init([])
 	}
 	
-	@inlinable
+	
 	public var startIndex: Int {
 		return changesets.startIndex
 	}
 	
-	@inlinable
+	
 	public var endIndex: Int {
 		return changesets.endIndex
 	}
 	
-	@inlinable
+	
 	public func index(after i: Int) -> Int {
 		return changesets.index(after: i)
 	}
 	
-	@inlinable
+	
 	public subscript(position: Int) -> Changeset<Collection> {
 		get { return changesets[position] }
 		set { changesets[position] = newValue }
 	}
 	
-	@inlinable
+	
 	public mutating func replaceSubrange<C: Swift.Collection, R: RangeExpression>(_ subrange: R, with newElements: C) where C.Element == Changeset<Collection>, R.Bound == Int {
 		changesets.replaceSubrange(subrange, with: newElements)
 	}
@@ -60,14 +60,14 @@ extension StagedChangeset: RandomAccessCollection, RangeReplaceableCollection, M
 }
 
 extension StagedChangeset: Equatable where Collection: Equatable {
-	@inlinable
+	
 	public static func == (lhs: StagedChangeset, rhs: StagedChangeset) -> Bool {
 		return lhs.changesets == rhs.changesets
 	}
 }
 
 extension StagedChangeset: ExpressibleByArrayLiteral {
-	@inlinable
+	
 	public init(arrayLiteral elements: Changeset<Collection>...) {
 		self.init(elements)
 	}

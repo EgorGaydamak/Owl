@@ -180,7 +180,7 @@ open class TableDirector: NSObject, UITableViewDataSourcePrefetching {
     ///
     /// - Parameter view: view to render, fails if it's not a subclass of `UITableViewHeaderFooterView`.
     /// - Returns: adapter.
-    @usableFromInline
+    
     internal func adapterForHeaderFooterView(_ view: UIView) -> TableHeaderFooterAdapterProtocol? {
         guard let view = view as? UITableViewHeaderFooterView else { return nil }
         let s = String(describing: view.self)

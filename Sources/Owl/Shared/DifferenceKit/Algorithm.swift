@@ -14,12 +14,12 @@ import Foundation
 
 public extension StagedChangeset where Collection: RangeReplaceableCollection, Collection.Element: ElementRepresentable {
 
-	@inlinable
+	
 	init(source: Collection, target: Collection) {
 		self.init(source: source, target: target, section: 0)
 	}
 	
-	@inlinable
+	
 	init(source: Collection, target: Collection, section: Int) {
 		let sourceElements = ContiguousArray(source)
 		let targetElements = ContiguousArray(target)
@@ -107,22 +107,22 @@ public extension StagedChangeset where Collection: RangeReplaceableCollection, C
 }
 
 /// A set of changes and metadata as a result of calculating differences in linear collection.
-@usableFromInline
+
 internal struct DifferentiateResult<Index> {
-	@usableFromInline
+	
 	internal typealias Metadata = (sourceTraces: ContiguousArray<Trace<Int>>, targetReferences: ContiguousArray<Int?>)
-	@usableFromInline
+	
 	internal let deleted: [Index]
-	@usableFromInline
+	
 	internal let inserted: [Index]
-	@usableFromInline
+	
 	internal let updated: [Index]
-	@usableFromInline
+	
 	internal let moved: [(source: Index, target: Index)]
-	@usableFromInline
+	
 	internal let metadata: Metadata
 	
-	@inlinable
+	
 	internal init(
 		deleted: [Index] = [],
 		inserted: [Index] = [],
@@ -140,45 +140,45 @@ internal struct DifferentiateResult<Index> {
 
 
 /// A set of informations in middle of difference calculation.
-@usableFromInline
+
 internal struct Trace<Index> {
-	@usableFromInline
+	
 	internal var reference: Index?
-	@usableFromInline
+	
 	internal var deleteOffset = 0
-	@usableFromInline
+	
 	internal var isTracked = false
 	
-	@inlinable
+	
 	init() {}
 }
 
 /// The occurrences of element.
-@usableFromInline
+
 internal enum Occurrence {
 	case unique(index: Int)
 	case duplicate(reference: IndicesReference)
 }
 
 /// A mutable reference to indices of elements.
-@usableFromInline
+
 internal final class IndicesReference {
-	@usableFromInline
+	
 	internal var indices: ContiguousArray<Int>
-	@usableFromInline
+	
 	internal var position = 0
 	
-	@inlinable
+	
 	internal init(_ indices: ContiguousArray<Int>) {
 		self.indices = indices
 	}
 	
-	@inlinable
+	
 	internal func push(_ index: Int) {
 		indices.append(index)
 	}
 	
-	@inlinable
+	
 	internal func next() -> Int? {
 		guard position < indices.endIndex else {
 			return nil
@@ -189,40 +189,40 @@ internal final class IndicesReference {
 }
 
 /// Dictionary key using UnsafePointer for performance optimization.
-@usableFromInline
+
 internal struct TableKey<T: Hashable>: Hashable {
-	@usableFromInline
+	
 	internal let pointeeHashValue: Int
-	@usableFromInline
+	
 	internal let pointer: UnsafePointer<T>
 
-	@inlinable
+	
 	internal init(pointer: UnsafePointer<T>) {
 		self.pointeeHashValue = pointer.pointee.hashValue
 		self.pointer = pointer
 	}
 
-	@inlinable
+	
 	internal static func == (lhs: TableKey, rhs: TableKey) -> Bool {
 		return lhs.pointeeHashValue == rhs.pointeeHashValue
 			&& (lhs.pointer.distance(to: rhs.pointer) == 0 || lhs.pointer.pointee == rhs.pointer.pointee)
 	}
 
-	@inlinable
+	
 	internal func hash(into hasher: inout Hasher) {
 		hasher.combine(pointer.pointee)
 	}
 }
 
 internal extension MutableCollection where Element: MutableCollection, Index == Int, Element.Index == Int {
-	@inlinable
+	
 	subscript(path: ElementPath) -> Element.Element {
 		get { return self[path.section][path.element] }
 		set { self[path.section][path.element] = newValue }
 	}
 }
 
-@inlinable
+
 @discardableResult
 internal func differentiate<E: Differentiable, I>(
 	source: ContiguousArray<E>,

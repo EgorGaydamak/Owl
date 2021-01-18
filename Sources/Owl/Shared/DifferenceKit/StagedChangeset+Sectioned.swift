@@ -14,7 +14,7 @@ import Foundation
 
 public extension StagedChangeset where Collection: RangeReplaceableCollection, Collection.Element: DifferentiableSection {
 	
-	@inlinable
+	
 	init(source: Collection, target: Collection) {
 		typealias Section = Collection.Element
 		typealias SectionIdentifier = String
